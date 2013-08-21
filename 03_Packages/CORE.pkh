@@ -1,0 +1,20 @@
+create or replace 
+package core as 
+
+  g_ex_column_not_found exception;
+  pragma exception_init (g_ex_column_not_found, -20001);
+
+  function insertIntoTable(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml)
+    return urowid;
+    
+  procedure insertIntoTable(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml);
+
+  procedure updateIntoTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml, p_id varchar2, p_primary_key_column varchar2 default null);
+
+  procedure updateIntoTableByRowid(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml, p_rowid urowid);
+
+  procedure deleteFromTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_id number, p_primary_key_column varchar2 default null);
+
+  procedure deleteFromTableByRowid(p_rowid urowid);
+
+end core;

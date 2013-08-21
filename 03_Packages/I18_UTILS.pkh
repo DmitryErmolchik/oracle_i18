@@ -1,0 +1,290 @@
+create or replace 
+package i18_utils 
+as
+
+  g_locale_context_code constant varchar2(32) := 'LOCALE';
+  g_text_id_separator constant varchar2(1) := '@';
+  g_i18_suffix constant varchar2(16) := 'INT';
+  g_locale_min_length constant number := 2;
+  g_locale_max_length constant number := 2;
+  
+  /*
+  * Get internationalization text
+  *
+  * @param p_text_id  Text identifier
+  * @param p_locale   Locale code
+  * @return           Localized text
+  */
+  function getText(p_text_id varchar2, p_locale varchar2 default null)
+    return varchar2;
+
+  /*
+  * Get internationalization text by rowid
+  *
+  * @param p_rowid        Row id
+  * @param p_column_name  Column name
+  * @param p_locale       Locale
+  * @return               Localized text
+  */
+  function getTextByRowId(p_rowid urowid, p_column_name varchar2 default null, p_locale varchar2 default null)
+    return varchar2;
+
+  /*
+  * Get internationalization text by table data and primary key ID
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_column_name  Column name
+  * @param p_primary_key  Primary key value
+  * @param p_locale       Locale
+  * @return               Localized text
+  */
+  function getTextByTableData(p_scheema_name varchar2 default user, p_table_name varchar2, p_column_name varchar2 default null, p_primary_key varchar2, p_locale varchar2 default null)
+    return varchar2;
+  
+  /*
+  * Get internationalization text. If no text in i18 table, then get text from source table
+  *
+  * @param p_text_id  Text identifier
+  * @param p_locale   Locale code
+  * @return           Localized text
+  */
+  function getTextExtended(p_text_id varchar2, p_locale varchar2 default null)
+    return varchar2;
+
+  /*
+  * Save internationalization text
+  *
+  * @param p_text_id  Text identifier
+  * @param p_text     Text to save
+  * @param p_locale   Locale code
+  */
+  procedure setText(p_text_id varchar2, p_text varchar2, p_locale varchar2);
+
+  /*
+  * Save internationalization text by locale from context
+  *
+  * @param p_text_id  Text identifier
+  * @param p_text     Text to save
+  */
+  procedure setText(p_text_id varchar2, p_text varchar2);
+
+  /*
+  * Save internationalization text
+  *
+  * @param p_rowid  Row Id
+  * @param p_text   Text to save
+  * @param p_locale Locale code
+  */
+  procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_locale varchar2);
+
+  /*
+  * Save internationalization text
+  *
+  * @param p_rowid        Row Id
+  * @param p_text         Text to save
+  * @param p_column_name  Column name
+  * @param p_locale       Locale code
+  */
+  procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_column_name varchar2, p_locale varchar2);
+
+  /*
+  * Save internationalization text by locale from context
+  *
+  * @param p_rowid  Row Id
+  * @param p_text   Text to save
+  */
+  procedure setTextByRowid(p_rowid urowid, p_text varchar2);
+
+  /*
+  * Save internationalization text
+  *
+  * @param p_rowid        Row Id
+  * @param p_text         Text to save
+  * @param p_column_name  Column name
+  */
+  procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_column_name varchar2);
+
+  /*
+  * Delete internationalization text by text id
+  *
+  * @param p_text_id    Text id
+  * @param p_locale_id  Locale
+  */
+  procedure delText(p_text_id varchar2, p_locale_id varchar2 default null);
+
+  /*
+  * Delete internationalization text by table information
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_column_name  Column name
+  * @param p_primary_key  Primary key
+  * @param p_locale_id    Locale
+  */
+  procedure delText(p_scheema_name varchar2 default user, p_table_name varchar2, p_column_name varchar2, p_primary_key varchar2, p_locale_id varchar2 default null);
+
+  /*
+  * Delete internationalization text by rowid
+  *
+  * @param p_rowid      Row id
+  * @param p_locale_id  Locale
+  */
+  procedure delTextByRowId(p_rowid urowid, p_coumn_name varchar2 default null, p_locale_id varchar2 default null);
+
+  /*
+  * Delete all internationalization text rowid
+  *
+  * @param p_rowid Row id
+  */
+  procedure delAllTexByRowid(p_rowid urowid);
+
+
+  /*
+  * Delete all internationalization text in table by id
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_primary_key  Primary key
+  */
+  procedure delAllTexByTableAndId(p_scheema_name varchar2 default user, p_table_name varchar2, p_primary_key varchar2);
+  
+  /*
+  * Generate id for text internationalization
+  *
+  * @param p_rowid        RowId
+  * @param p_primary_key  Primary key
+  * @param p_table_name   Table name
+  * @return               Varchar text_id for i18 table
+  */
+  function genTextIdByRowid(p_rowid urowid, p_column_name varchar2 default null)
+    return varchar2;
+
+  /*
+  * Generate id for text internationalization
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_column_name  Column name
+  * @param p_primary_key  Primary key
+  * @return               Varchar text_id for i18 table
+  */
+  function genTextIdByTableData(p_scheema_name varchar2 default user, p_table_name varchar2, p_column_name varchar2, p_primary_key varchar2)
+    return varchar2;
+
+  /*
+  * Get primary key value from text id
+  *
+  * @param p_text_id  Text identifier
+  * @return Primary key value
+  */
+  function getPrimatyKeyFromTextId(p_text_id varchar2)
+    return varchar2;
+
+  /*
+  * Get column name from text id
+  *
+  * @param p_text_id  Text identifier
+  * @return Column name
+  */
+  function getColumnFromTextId(p_text_id varchar2)
+    return varchar2;
+
+  /*
+  * Get table name from text id
+  *
+  * @param p_text_id  Text identifier
+  * @return Table name
+  */
+  function getTableFromTextId(p_text_id varchar2)
+    return varchar2;
+
+  /*
+  * Get scheema name from text id
+  *
+  * @param p_text_id  Text identifier
+  * @return Scheema name
+  */
+  function getScheemaFromTextId(p_text_id varchar2)
+    return varchar2;
+
+  /*
+  * Get scheema name, table name, column_name, primary key value from text id
+  *
+  * @param p_text_id  Text identifier
+  * @param p_scheema_name  Scheema name
+  * @param p_table_name  Table name
+  * @param p_column_name  Column name
+  * @param p_primary_key  Primary key value
+  */
+  procedure getDataFromTextId(p_text_id varchar2,
+                              p_scheema_name out varchar2,
+                              p_table_name out varchar2,
+                              p_column_name out varchar2,
+                              p_primary_key out varchar2);
+
+  /*
+  * Return locale from context or from userenv('LANG') if no parameter in context
+  *
+  * @return Returns the ISO abbreviation of language
+  */
+  function getLocale
+    return varchar2;
+  
+  /*
+  * Return locale from column name
+  *
+  * @param p_column_name  Column name looks like "COLUMN_INT/EN"
+  * @return Returns the ISO abbreviation of language
+  */
+  function getLocaleFromColumnName(p_column_name varchar2)
+    return varchar2;
+
+  /*
+  * Return column name without locale data
+  *
+  * @param p_column_name  Column name
+  * @return Returns column name without locale data
+  */
+  function getClearColumnName(p_column_name varchar2)
+    return varchar2;
+    
+  /*
+  * Check is locale in column name
+  *
+  * @param p_column_name  Column name looks like "COLUMN_INT/EN"
+  * @return true or false
+  */
+  function isLocaleInColumnName(p_column_name varchar2)
+    return boolean;
+
+  /*
+  * Check is column name with i18 data
+  *
+  * @param p_column_name  Column name
+  * @return true or false
+  */
+  function isI18Column(p_column_name varchar2)
+    return boolean;
+
+  /*
+  * Get primary key column name
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @return primary key column name
+  */
+  function getPrimaryKeyColumn(p_scheema_name varchar2 default user, p_table_name varchar2) 
+    return varchar2;
+
+  /*
+  * Get table info from rowid
+  *
+  * @param p_rowid              Row id
+  * @param p_scheema_name       Scheema name
+  * @param p_table_name         Table name
+  * @param p_primary_key_column Primary key column
+  */
+  procedure getTableInfoByRowid(p_rowid urowid, p_scheema_name out varchar2, p_table_name out varchar2, p_primary_key_column out varchar2);
+
+end i18_utils;

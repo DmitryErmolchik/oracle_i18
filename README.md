@@ -1,4 +1,4 @@
 oracle_i18
 ==========
 
-This is library for easy internationalization ин oracle database.
+This is library for easy internationalization in oracle database.

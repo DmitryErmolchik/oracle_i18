@@ -1,6 +1,15 @@
 create or replace 
 package body core as
 
+  ----------------------------columnsNameToUpperCase----------------------------
+  procedure columnsNameToUpperCase (p_value in out tt_dml) as
+  begin
+    for l_index in p_value.first .. p_value.last
+    loop
+      p_value(l_index).key := upper(p_value(l_index).key);
+    end loop;
+  end columnsNameToUpperCase;
+
   ---------------------------isAllColumnsExists---------------------------------
   function isAllColumnsExists(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml)
     return boolean as
@@ -28,6 +37,10 @@ package body core as
       l_return := true;
     end if;
     return l_return;
+  exception
+    when others
+    then
+      raise;
   end isAllColumnsExists;
 
   ------------------------------selectLocale------------------------------------
@@ -52,16 +65,14 @@ package body core as
   end selectLocale;
   
   --------------------------insertIntoTable-------------------------------------
-  /*procedure insertIntoTable(p_table_name varchar2, p_value tt_dml) as
-  begin
-    insertIntoTable(user, p_table_name, p_value);
-  end insertIntoTable;*/
-
-  --------------------------insertIntoTable-------------------------------------
   procedure insertIntoTable(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml) as
     l_rid urowid;
   begin
     l_rid := insertIntoTable(p_scheema_name, p_table_name, p_value);
+  exception
+    when others
+    then
+      raise;
   end insertIntoTable;
 
   --------------------------insertIntoTable-------------------------------------
@@ -73,41 +84,43 @@ package body core as
     l_is_i18 boolean := false;
     l_locale locales.locale_id%type;
     l_i18_data tt_i18 := tt_i18();
+    l_value tt_dml := p_value;
   begin
-    if not isAllColumnsExists(p_scheema_name, p_table_name, p_value)
+    columnsNameToUpperCase(l_value);
+    if not isAllColumnsExists(p_scheema_name, p_table_name, l_value)
     then
       raise_application_error(-20001, 'Wrong column name in p_val parameter');
     end if;
     
-    l_locale := selectLocale(p_value);
+    l_locale := selectLocale(l_value);
     
     l_insert_stmt := 'INSERT INTO ' || p_scheema_name || '.' || p_table_name || '(';
     l_values_stmt := 'VALUES(';
-    for l_index in p_value.first .. p_value.last
+    for l_index in l_value.first .. l_value.last
     loop
-      if  (upper(p_Value(l_index).key) = i18_utils.g_locale_context_code)
+      if  (l_value(l_index).key = i18_utils.g_locale_context_code)
       then
         -- Skip column with name equal i18_utils.g_locale_context_code
         null;
       else
-        if (i18_utils.isI18Column(p_Value(l_index).key))
+        if (i18_utils.isI18Column(l_value(l_index).key))
         then
           l_is_i18 := true;
           l_i18_data.extend();
           
-          l_i18_data(l_i18_data.last) := tr_i18(locale => nvl(i18_utils.getLocaleFromColumnName(p_Value(l_index).key), l_locale),
-                                                column_name => i18_utils.getClearColumnName(p_Value(l_index).key),
-                                                value => p_Value(l_index).value);
+          l_i18_data(l_i18_data.last) := tr_i18(locale => nvl(i18_utils.getLocaleFromColumnName(l_value(l_index).key), l_locale),
+                                                column_name => i18_utils.getClearColumnName(l_value(l_index).key),
+                                                value => l_value(l_index).value);
           
-          if (i18_utils.getClearColumnName(p_Value(l_index).key) = p_Value(l_index).key)
+          if (i18_utils.getClearColumnName(l_value(l_index).key) = l_value(l_index).key)
           then
             -- Column exists in table
-            l_insert_stmt := l_insert_stmt || p_Value(l_index).key || ',';
-            l_values_stmt := l_values_stmt || '''' || p_Value(l_index).value || ''',';
+            l_insert_stmt := l_insert_stmt || l_value(l_index).key || ',';
+            l_values_stmt := l_values_stmt || '''' || l_value(l_index).value || ''',';
           end if;
         else
-          l_insert_stmt := l_insert_stmt || p_Value(l_index).key || ',';
-          l_values_stmt := l_values_stmt || '''' || p_Value(l_index).value || ''',';
+          l_insert_stmt := l_insert_stmt || l_value(l_index).key || ',';
+          l_values_stmt := l_values_stmt || '''' || l_value(l_index).value || ''',';
         end if;
       end if;
     end loop;
@@ -132,7 +145,6 @@ package body core as
                                    p_locale => l_i18_data(l_index).locale);
 
           dbms_output.put_line('Locale: ' || l_i18_data(l_index).locale || ' Column: ' || l_i18_data(l_index).column_name || ' Value: ' || l_i18_data(l_index).value);
-
       end loop;
     end if;
     return l_rid;
@@ -162,6 +174,10 @@ package body core as
     into l_rid
     using p_id;
     updateIntoTableByRowid(p_scheema_name, p_table_name, p_value, l_rid);
+  exception
+    when others
+    then
+      raise;
   end updateIntoTableById;
 
   -----------------------updateIntoTableByRowid---------------------------------
@@ -171,38 +187,40 @@ package body core as
     l_where_stmt varchar2(32767);
     l_is_i18 boolean := false;
     l_i18_data tt_i18 := tt_i18();
+    l_value tt_dml := p_value;
   begin
+    columnsNameToUpperCase(l_value);
     if not isAllColumnsExists(p_scheema_name, p_table_name, p_value)
     then
       raise_application_error(-20001, 'Wrong column name in p_val parameter');
     end if;
-    l_locale := selectLocale(p_value);
+    l_locale := selectLocale(l_value);
     l_set_stmt := 'UPDATE ' || p_scheema_name || '.' || p_table_name || ' SET ';
     l_where_stmt := 'WHERE ROWID = :p_rowid';
 
-    for l_index in p_value.first .. p_value.last
+    for l_index in l_value.first .. l_value.last
     loop
-      if  (upper(p_Value(l_index).key) = i18_utils.g_locale_context_code)
+      if  (l_value(l_index).key = i18_utils.g_locale_context_code)
       then
         -- Skip column with name equal i18_utils.g_locale_context_code
         null;
       else
-        if (i18_utils.isI18Column(p_Value(l_index).key))
+        if (i18_utils.isI18Column(l_value(l_index).key))
         then
           l_is_i18 := true;
           l_i18_data.extend();
           
-          l_i18_data(l_i18_data.last) := tr_i18(locale => nvl(i18_utils.getLocaleFromColumnName(p_Value(l_index).key), l_locale),
-                                                column_name => i18_utils.getClearColumnName(p_Value(l_index).key),
-                                                value => p_Value(l_index).value);
+          l_i18_data(l_i18_data.last) := tr_i18(locale => nvl(i18_utils.getLocaleFromColumnName(l_value(l_index).key), l_locale),
+                                                column_name => i18_utils.getClearColumnName(l_value(l_index).key),
+                                                value => l_value(l_index).value);
           
-          if (i18_utils.getClearColumnName(p_Value(l_index).key) = p_Value(l_index).key)
+          if (i18_utils.getClearColumnName(l_value(l_index).key) = l_value(l_index).key)
           then
             -- Column exists in table
-            l_set_stmt := l_set_stmt || p_Value(l_index).key || '=' || '''' || p_Value(l_index).value || ''',';
+            l_set_stmt := l_set_stmt || l_value(l_index).key || '=' || '''' || l_value(l_index).value || ''',';
           end if;
         else
-          l_set_stmt := l_set_stmt || p_Value(l_index).key || '=' || '''' || p_Value(l_index).value || ''',';
+          l_set_stmt := l_set_stmt || l_value(l_index).key || '=' || '''' || l_value(l_index).value || ''',';
         end if;
       end if;
     end loop;
@@ -258,6 +276,10 @@ package body core as
       'delete from ' || p_scheema_name || '.' || p_table_name || ' ' ||
       'where ' || l_primary_key_column || '= :p_id'
     using p_id;
+  exception
+    when others
+    then
+      raise;
   end deleteFromTableById;
 
   --------------------------deleteFromTable-------------------------------------
@@ -270,7 +292,10 @@ package body core as
       'delete from ' || p_scheema_name || '.' || p_table_name || ' ' ||
       'where rowid = :p_rowid'
     using p_rowid;
-
+  exception
+    when others
+    then
+      raise;
   end deleteFromTableByRowid;
 
   --------------------------deleteFromTable-------------------------------------
@@ -282,6 +307,9 @@ package body core as
     -- Delte table data
     i18_utils.getTableInfoByRowid(p_rowid, l_scheema_name, l_table_name, l_primary_key_column);
     deleteFromTableByRowid(l_scheema_name, l_table_name, p_rowid);
+  exception
+    when others
+    then
+      raise;
   end deleteFromTableByRowid;
-
 end core;

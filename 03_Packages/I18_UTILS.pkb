@@ -51,8 +51,12 @@ package body i18_utils as
         on c.constraint_name = cc.constraint_name
           and col.column_name = cc.column_name
           and cc.owner = col.owner
-    where o.object_id = l_object_id
+    where o.data_object_id = l_object_id
       and c.constraint_type = 'P';
+  exception
+    when others
+    then
+      raise;
   end getTableInfoByRowid;
 
   -----------------------------getText------------------------------------------
@@ -82,6 +86,10 @@ package body i18_utils as
           where i.text_id = p_text_id)
     where lvl = minlvl;
     return l_return;
+  exception
+    when others
+    then
+      raise;
   end getText;
 
   -----------------------------getTextByRowId------------------------------------------
@@ -96,6 +104,10 @@ package body i18_utils as
     else
       return getText(genTextIdByRowid(p_rowid, p_column_name), p_locale);
     end if;
+  exception
+    when others
+    then
+      raise;
   end getTextByRowId;
 
   ------------------------getTextByTableData------------------------------------
@@ -135,6 +147,10 @@ package body i18_utils as
     else
       return getText(l_text_id, p_locale);
     end if;
+  exception
+    when others
+    then
+      raise;
   end getTextByTableData;
 
   -------------------------getTextExtended--------------------------------------
@@ -165,6 +181,9 @@ package body i18_utils as
       into l_return
       using l_primary_key;
       return l_return;
+    when others
+    then
+      raise;
   end getTextExtended;
 
   -----------------------------setText------------------------------------------
@@ -181,36 +200,60 @@ package body i18_utils as
         then
           insert (locale_id, text_id, text)
           values (s.locale_id, s.text_id, s.text);
+  exception
+    when others
+    then
+      raise;
   end setText;
 
   -----------------------------setText------------------------------------------
   procedure setText(p_text_id varchar2, p_text varchar2) as
   begin
     setText(p_text_id => p_text_id, p_text => p_text, p_locale => getLocale);
+  exception
+    when others
+    then
+      raise;
   end setText;
 
   --------------------------setTextByRowid--------------------------------------
   procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_locale varchar2) as
   begin
     setText(p_text_id => genTextIdByRowid(p_rowid), p_text => p_text, p_locale => p_locale);
+  exception
+    when others
+    then
+      raise;
   end setTextByRowid;
 
   --------------------------setTextByRowid--------------------------------------
   procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_column_name varchar2, p_locale varchar2) as
   begin
     setText(p_text_id => genTextIdByRowid(p_rowid, p_column_name), p_text => p_text, p_locale => p_locale);
+  exception
+    when others
+    then
+      raise;
   end setTextByRowid;
 
   --------------------------setTextByRowid--------------------------------------
   procedure setTextByRowid(p_rowid urowid, p_text varchar2) as
   begin
     setText(p_text_id => genTextIdByRowid(p_rowid), p_text => p_text, p_locale => getLocale);
+  exception
+    when others
+    then
+      raise;
   end setTextByRowid;
 
   --------------------------setTextByRowid--------------------------------------
   procedure setTextByRowid(p_rowid urowid, p_text varchar2, p_column_name varchar2) as
   begin
     setText(p_text_id => genTextIdByRowid(p_rowid, p_column_name), p_text => p_text, p_locale => getLocale);
+  exception
+    when others
+    then
+      raise;
   end setTextByRowid;
 
   --------------------------------delText---------------------------------------
@@ -225,18 +268,30 @@ package body i18_utils as
         delete from i18
         where text_id = p_text_id;
     end if;
+  exception
+    when others
+    then
+      raise;
   end delText;
 
   --------------------------------delText---------------------------------------
   procedure delText(p_scheema_name varchar2 default user, p_table_name varchar2, p_column_name varchar2, p_primary_key varchar2, p_locale_id varchar2 default null) as
   begin
     delText(genTextIdByTableData(p_scheema_name, p_table_name, p_column_name, p_primary_key), p_locale_id);
+  exception
+    when others
+    then
+      raise;
   end delText;
 
   ----------------------------delTextByRowId------------------------------------
   procedure delTextByRowId(p_rowid urowid, p_coumn_name varchar2 default null, p_locale_id varchar2 default null) as
   begin
     delText(genTextIdByRowId(p_rowid, p_coumn_name), p_locale_id);
+  exception
+    when others
+    then
+      raise;
   end delTextByRowId;
 
   -------------------------delAllTexByTableAndId--------------------------------
@@ -247,6 +302,10 @@ package body i18_utils as
     SYS.dbms_output.put_line(l_template);
     delete from i18
     where text_id like l_template;
+  exception
+    when others
+    then
+      raise;
   end delAllTexByTableAndId;
 
   ----------------------------delAllTexByRowid----------------------------------
@@ -264,6 +323,10 @@ package body i18_utils as
     into l_primary_key
     using p_rowid;
     delAllTexByTableAndId(p_scheema_name => l_scheema_name, p_table_name => l_table_name, p_primary_key => l_primary_key);
+  exception
+    when others
+    then
+      raise;
   end delAllTexByRowid;
 
   ----------------------genTextIdFromTblData-------------------------------------
@@ -271,6 +334,10 @@ package body i18_utils as
     return varchar2 as
   begin
     return upper(p_scheema_name || g_text_id_separator || p_table_name || g_text_id_separator || p_column_name || g_text_id_separator || p_primary_key);
+  exception
+    when others
+    then
+      raise;
   end genTextIdByTableData;
 
   ------------------------genTextIdByRowid--------------------------------------
@@ -316,8 +383,10 @@ package body i18_utils as
       raise NO_DATA_FOUND;
     end if;
     return null;
-    exception
-      when others then raise;
+  exception
+    when others
+    then
+      raise;
   end genTextIdByRowid;
 
   ---------------------getPrimatyKeyFromTextId-----------------------------------
@@ -327,6 +396,10 @@ package body i18_utils as
   begin
     l_return := regexp_substr(p_text_id, g_text_id_separator || '[[:alnum:]\_]+', 1, 3);
     return substrc(l_return, 2, lengthc(l_return)-1);
+  exception
+    when others
+    then
+      raise;
   end getPrimatyKeyFromTextId;
 
   ------------------------getColumnFromTextId-------------------------------------
@@ -336,6 +409,10 @@ package body i18_utils as
   begin
     l_return := regexp_substr(p_text_id, g_text_id_separator || '[[:alnum:]\_]+', 1, 2);
     return substrc(l_return, 2, lengthc(l_return)-1);
+  exception
+    when others
+    then
+      raise;
   end getColumnFromTextId;
 
   -----------------------getTableFromTextId-------------------------------------
@@ -345,6 +422,10 @@ package body i18_utils as
   begin
     l_return := regexp_substr(p_text_id, g_text_id_separator || '[[:alnum:]\_]+', 1, 1);
     return substrc(l_return, 2, lengthc(l_return)-1);
+  exception
+    when others
+    then
+      raise;
   end getTableFromTextId;
 
   -----------------------getScheemaFromTextId-------------------------------------
@@ -354,6 +435,10 @@ package body i18_utils as
   begin
     l_return := regexp_substr(p_text_id, '[[:alnum:]\_]+' || g_text_id_separator, 1, 1);
     return substrc(l_return, 1, lengthc(l_return)-1);
+  exception
+    when others
+    then
+      raise;
   end getScheemaFromTextId;
 
 
@@ -368,7 +453,27 @@ package body i18_utils as
     p_table_name := getTableFromTextId(p_text_id);
     p_column_name := getColumnFromTextId(p_text_id);
     p_primary_key := getPrimatyKeyFromTextId(p_text_id);
+  exception
+    when others
+    then
+      raise;
   end getDataFromTextId;
+
+  -----------------------------settLocale---------------------------------------
+  procedure setLocale(p_locale varchar2) as
+    l_locale locales.locale_id%type;
+  begin
+    select locale_id
+    into l_locale
+    from locales
+    where locale_id = upper(p_locale);
+    
+    context.set_value(g_locale_context_code, l_locale);
+  exception
+    when others
+    then
+      raise;
+  end setLocale;
 
   -----------------------------getLocale---------------------------------------
   function getLocale
@@ -381,6 +486,10 @@ package body i18_utils as
       l_return := userenv('LANG');
     end if;
     return upper(l_return);
+  exception
+    when others
+    then
+      raise;
   end getLocale;
 
   ------------------------getLocaleFromColumnName-------------------------------
@@ -389,6 +498,10 @@ package body i18_utils as
   begin
     return substrc(regexp_substr(p_column_name, '\_' || g_i18_suffix || '/\w{'|| g_locale_min_length || ',' || g_locale_max_length || '}'),
                    length('\_' || g_i18_suffix || '/'));
+  exception
+    when others
+    then
+      raise;
   end getLocaleFromColumnName;
 
   ------------------------getLocaleFromColumnName-------------------------------
@@ -409,6 +522,10 @@ package body i18_utils as
       l_return := l_column_name;
     end if;
     return l_return;
+  exception
+    when others
+    then
+      raise;
   end getClearColumnName;
   
   -------------------------isLocaleInColumnName---------------------------------
@@ -421,6 +538,10 @@ package body i18_utils as
       l_return := true;
     end if;
     return l_return;
+  exception
+    when others
+    then
+      raise;
   end isLocaleInColumnName;
 
   -------------------------isLocaleInColumnName---------------------------------
@@ -434,7 +555,9 @@ package body i18_utils as
       l_return := true;
     end if;
     return l_return;
+  exception
+    when others
+    then
+      raise;
   end isI18Column;
-
-
 end i18_utils;

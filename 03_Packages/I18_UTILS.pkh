@@ -224,6 +224,11 @@ as
                               p_primary_key out varchar2);
 
   /*
+  * @param p_locale Locale ID from table LOCALES
+  */
+  procedure setLocale(p_locale varchar2);
+
+  /*
   * Return locale from context or from userenv('LANG') if no parameter in context
   *
   * @return Returns the ISO abbreviation of language

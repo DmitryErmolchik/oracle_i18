@@ -1,7 +1,17 @@
 create or replace 
 package context as 
 
-  g_context_name constant varchar2(30) := 'lirt_ctx';
+  g_context_name constant varchar2(30) := 'app_ctx';
+
+  /*
+  * Create context
+  */
+  procedure create_context;
+
+  /*
+  * Drop context
+  */
+  procedure drop_context;
 
   /*
   * Set value to context by key

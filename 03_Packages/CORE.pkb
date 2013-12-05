@@ -136,10 +136,10 @@ package body core as
       end loop;
     end if;
     return l_rid;
-/*  exception
+  exception
     when others
     then
-      raise;*/
+      raise;
   end insertIntoTable;
 
   ------------------------updateIntoTableById----------------------------------
@@ -236,7 +236,7 @@ package body core as
   end updateIntoTableByRowid;
 
   ------------------------deleteFromTableById-----------------------------------
-  procedure deleteFromTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_id number, p_primary_key_column varchar2 default null) as
+  procedure deleteFromTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_id varchar2, p_primary_key_column varchar2 default null) as
     l_rid urowid;
     l_primary_key_column all_tab_columns.column_name%type;
   begin
@@ -261,20 +261,27 @@ package body core as
   end deleteFromTableById;
 
   --------------------------deleteFromTable-------------------------------------
+  procedure deleteFromTableByRowid(p_scheema_name varchar2 default user, p_table_name varchar2, p_rowid urowid) as
+  begin
+    -- Delete all international text
+    i18_utils.delAllTexByRowid(p_rowid => p_rowid);
+    dbms_output.put_line('Deleting data from table ' || p_scheema_name || '.' || p_table_name || ' where rowid = ' || p_rowid);
+    execute immediate
+      'delete from ' || p_scheema_name || '.' || p_table_name || ' ' ||
+      'where rowid = :p_rowid'
+    using p_rowid;
+
+  end deleteFromTableByRowid;
+
+  --------------------------deleteFromTable-------------------------------------
   procedure deleteFromTableByRowid(p_rowid urowid) as
     l_scheema_name all_tab_columns.owner%type;
     l_table_name all_tab_columns.table_name%type;
     l_primary_key_column all_tab_columns.column_name%type;
   begin
-    -- Delete all international text
-    i18_utils.delAllTexByRowid(p_rowid => p_rowid);
     -- Delte table data
     i18_utils.getTableInfoByRowid(p_rowid, l_scheema_name, l_table_name, l_primary_key_column);
-    dbms_output.put_line('Deleting data from table ' || l_scheema_name || '.' || l_table_name || ' where rowid = ' || p_rowid);
-    execute immediate
-      'delete from ' || l_scheema_name || '.' || l_table_name || ' ' ||
-      'where rowid = :p_rowid'
-    using p_rowid;
+    deleteFromTableByRowid(l_scheema_name, l_table_name, p_rowid);
   end deleteFromTableByRowid;
 
 end core;

@@ -10,7 +10,7 @@ ALTER TABLE Locales ADD CONSTRAINT PK_Languages PRIMARY KEY
 )
 ;
 
-CREATE OR REPLACE TRIGGER "LIRT"."UPPER_LOCALE_ID" 
+CREATE OR REPLACE TRIGGER upper_locale_id 
 before insert or update on locales
 for each row
 begin

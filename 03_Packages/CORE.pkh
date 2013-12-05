@@ -4,17 +4,71 @@ package core as
   g_ex_column_not_found exception;
   pragma exception_init (g_ex_column_not_found, -20001);
 
+  /*
+  * Insert data into table
+  *
+  * @param p_scheema_name  Scheema name
+  * @param p_table_name    Table name
+  * @param p_value         Key-value pairs
+  * @return                UROWID of new data
+  */
   function insertIntoTable(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml)
     return urowid;
     
+  /*
+  * Insert data into table
+  *
+  * @param p_scheema_name  Scheema name
+  * @param p_table_name    Table name
+  * @param p_value         Key-value pairs
+  */
   procedure insertIntoTable(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml);
 
+  /*
+  * Update data in table by primary key
+  *
+  * @param p_scheema_name       Scheema name
+  * @param p_table_name         Table name
+  * @param p_value              Key-value pairs
+  * @param p_primary_key_column Name of primary key column
+  */
   procedure updateIntoTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml, p_id varchar2, p_primary_key_column varchar2 default null);
 
+  /*
+  * Update data in table by rowId
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_value        Key-value pairs
+  * @param p_rowid        RowId of update row
+  */
   procedure updateIntoTableByRowid(p_scheema_name varchar2 default user, p_table_name varchar2, p_value tt_dml, p_rowid urowid);
 
-  procedure deleteFromTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_id number, p_primary_key_column varchar2 default null);
+  /*
+  * Delete data from table by primary key
+  *
+  * @param p_scheema_name       Scheema name
+  * @param p_table_name         Table name
+  * @param p_id                 Primary key value
+  * @param p_primary_key_column Name of primary key column
+  */
+  procedure deleteFromTableById(p_scheema_name varchar2 default user, p_table_name varchar2, p_id varchar2, p_primary_key_column varchar2 default null);
 
+  /*
+  * Delete data from table by rowId
+  *
+  * @param p_scheema_name Scheema name
+  * @param p_table_name   Table name
+  * @param p_value        Key-value pairs
+  * @param p_rowid        RowId of update row
+  */
+  procedure deleteFromTableByRowid(p_scheema_name varchar2 default user, p_table_name varchar2, p_rowid urowid);
+
+  /*
+  * Delete data from table by rowId
+  *
+  * @param p_rowid        RowId of update row
+  */
   procedure deleteFromTableByRowid(p_rowid urowid);
 
 end core;
